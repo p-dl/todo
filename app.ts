@@ -1,3 +1,7 @@
+type Saved = {
+    states: Array<boolean>
+    items: Array<string>
+}
 class Item {
     task: string
     state: boolean
@@ -5,7 +9,9 @@ class Item {
     constructor(task: string, state: boolean) {
         this.task = task
         this.state = state
-        const listItem = document.createTextNode(task)
+    }
+    addNew(): void {
+        const listItem = document.createTextNode(this.task)
         const btnDelete = document.createElement('button')
         const btnCompleted = document.createElement('button')
         btnDelete.innerText = "Delete"
@@ -16,8 +22,7 @@ class Item {
         btnCompleted.classList.add("btn")
         btnCompleted.classList.add("btn-success")
         btnCompleted.onclick = function (e) { markCompleted(e) }
-
-        if (state) {
+        if (this.state) {
             const liUp = document.createElement('li')
             liUp.classList.add("list-group-item")
             liUp.setAttribute("id", `list_${Item.counter++}`)
@@ -37,50 +42,65 @@ class Item {
             completedUL.appendChild(liDown)
         }
     }
+    static removeAll(): void {
+        let element = document.getElementById("todoUL")!
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+        element = document.getElementById("completedUL")!
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+    }
 }
-
-const saved = { states: localStorage.states && JSON.parse(localStorage.states) || [], items: localStorage.items && JSON.parse(localStorage.items) || [] }
-saved.items.forEach((todo: string, index: number) => {
-    new Item(todo, saved.states[index])
-});
-
+const saved: Saved = { states: localStorage.states && JSON.parse(localStorage.states) || [], items: localStorage.items && JSON.parse(localStorage.items) || [] }
+reclone()
+function reclone(): void {
+    Item.removeAll()
+    Item.counter = 0
+    saved.items.forEach((todo: string, index: number): void => {
+        new Item(todo, saved.states[index]).addNew()
+    })
+}
 let save: HTMLElement = document.getElementById('save')!
-save.onclick = function (e: Event) {
+let msg:HTMLElement = document.getElementById('message')!
+save.onclick = function (e: Event): void {
     e.preventDefault()
     let todoName: HTMLInputElement = <HTMLInputElement>document.getElementById('todoName')
-    const item: string = todoName.value
+    const item: string = todoName.value.toString()
     saved.states.push(true)
     saved.items.push(item)
     localStorage.setItem("states", JSON.stringify(saved.states))
     localStorage.setItem("items", JSON.stringify(saved.items))
-    new Item(item, true)
+    new Item(item, true).addNew()
     let inputForm: HTMLFormElement = <HTMLFormElement>document.getElementById('inputForm')
-    let msg = document.getElementById('message')!
-    msg.innerHTML = `<div class="alert alert-success">ToDo ${item} added successfully.</div>`
+    msg.innerText = `ToDo ${item} added successfully.`
     inputForm.reset()
 }
 
-const markCompleted = (e: Event) => {
+function markCompleted(e: Event): void {
     let parent = (e.target as HTMLButtonElement).parentNode
-    let parentId = (parent as HTMLDataListElement).id
+    let parentId = (parent as HTMLLIElement).id
     let num: number = parseInt(parentId.split('_')[1])
     saved.states.splice(num, 1, !saved.states[num])
     localStorage.setItem("states", JSON.stringify(saved.states))
-    location.reload()
+    reclone()
 }
 
-const markDelete = (e: Event) => {
+function markDelete(e: Event): void {
     let parent = (e.target as HTMLButtonElement).parentNode
-    let parentId = (parent as HTMLDataListElement).id
+    let parentId = (parent as HTMLLIElement).id
     let num: number = parseInt(parentId.split('_')[1])
     saved.states.splice(num, 1)
     saved.items.splice(num, 1)
     localStorage.setItem("states", JSON.stringify(saved.states))
     localStorage.setItem("items", JSON.stringify(saved.items))
-    location.reload()
+    reclone()
 }
 
-const clearAll = () => {
+function clearAll(): void {
     localStorage.clear()
-    location.reload()
+    Item.removeAll()
+    Item.counter = 0
+    msg.innerText = `ToDo lists has been cleared.`
 }
