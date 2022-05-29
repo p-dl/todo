@@ -92,7 +92,8 @@ function markDelete(e) {
 }
 function clearAll() {
     localStorage.clear();
-    Item.removeAll();
-    Item.counter = 0;
-    msg.innerText = `ToDo lists has been cleared.`;
+    saved.items = [];
+    saved.states = [];
+    reclone();
+    msg.innerText = `Todo lists has been cleared.`;
 }
