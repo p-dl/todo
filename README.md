@@ -6,4 +6,4 @@ Added features:
 - Remember state when refreshed.
 
 #### Demo link:
-#### https://p-dl.github.io/todo
+#### https://p-dl.github.io/todo/

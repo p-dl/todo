@@ -2,6 +2,7 @@ type Saved = {
     states: Array<boolean>
     items: Array<string>
 }
+
 class Item {
     task: string
     state: boolean
@@ -43,18 +44,16 @@ class Item {
         }
     }
     static removeAll(): void {
-        let element = document.getElementById("todoUL")!
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
-        element = document.getElementById("completedUL")!
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+        document.getElementById("todoUL")!.innerHTML = "";
+        document.getElementById("completedUL")!.innerHTML = "";
     }
 }
+
 const saved: Saved = { states: localStorage.states && JSON.parse(localStorage.states) || [], items: localStorage.items && JSON.parse(localStorage.items) || [] }
 reclone()
+let save: HTMLElement = document.getElementById('save')!
+let msg: HTMLElement = document.getElementById('message')!
+
 function reclone(): void {
     Item.removeAll()
     Item.counter = 0
@@ -62,12 +61,10 @@ function reclone(): void {
         new Item(todo, saved.states[index]).addNew()
     })
 }
-let save: HTMLElement = document.getElementById('save')!
-let msg:HTMLElement = document.getElementById('message')!
+
 save.onclick = function (e: Event): void {
     e.preventDefault()
-    let todoName: HTMLInputElement = <HTMLInputElement>document.getElementById('todoName')
-    const item: string = todoName.value.toString()
+    let item: string = (<HTMLInputElement>document.getElementById('todoName')!).value
     saved.states.push(true)
     saved.items.push(item)
     localStorage.setItem("states", JSON.stringify(saved.states))
@@ -79,23 +76,23 @@ save.onclick = function (e: Event): void {
 }
 
 function markCompleted(e: Event): void {
-    let parent = (e.target as HTMLButtonElement).parentNode
-    let parentId = (parent as HTMLLIElement).id
-    let num: number = parseInt(parentId.split('_')[1])
-    saved.states.splice(num, 1, !saved.states[num])
+    let parentId: string = (<HTMLLIElement>(<HTMLButtonElement>e.target).parentNode).id
+    let index: number = parseInt(parentId.split('_')[1])
+    saved.states.splice(index, 1, !saved.states[index])
     localStorage.setItem("states", JSON.stringify(saved.states))
     reclone()
+    msg.innerText = `One Todo item moved to completed.`
 }
 
 function markDelete(e: Event): void {
-    let parent = (e.target as HTMLButtonElement).parentNode
-    let parentId = (parent as HTMLLIElement).id
-    let num: number = parseInt(parentId.split('_')[1])
-    saved.states.splice(num, 1)
-    saved.items.splice(num, 1)
+    let parentId: string = (<HTMLLIElement>(<HTMLButtonElement>e.target).parentNode).id
+    let index: number = parseInt(parentId.split('_')[1])
+    saved.states.splice(index, 1)
+    saved.items.splice(index, 1)
     localStorage.setItem("states", JSON.stringify(saved.states))
     localStorage.setItem("items", JSON.stringify(saved.items))
     reclone()
+    msg.innerText = `One Todo item has been deleted.`
 }
 
 function clearAll(): void {
@@ -103,5 +100,5 @@ function clearAll(): void {
     saved.items = []
     saved.states = []
     reclone()
-    msg.innerText = `Todo lists has been cleared.`
+    msg.innerText = `All Todo items have been cleared.`
 }
