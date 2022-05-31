@@ -111,7 +111,7 @@ const startApp = (todoItem: string = "", isCompleted: boolean = true): void => {
 startApp()
 addButton.onclick = (e: Event) => {
     e.preventDefault()
-    let item: string = (<HTMLInputElement>document.getElementById('todoName')!).value
+    let item: string = (<HTMLInputElement>document.getElementById('todoName')!).value.trim()
     if (item === "") {
         Todo.emptyMessage()
     } else {

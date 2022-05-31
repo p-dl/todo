@@ -96,7 +96,7 @@ const startApp = (todoItem = "", isCompleted = true) => {
 startApp();
 addButton.onclick = (e) => {
     e.preventDefault();
-    let item = document.getElementById('todoName').value;
+    let item = document.getElementById('todoName').value.trim();
     if (item === "") {
         Todo.emptyMessage();
     }
