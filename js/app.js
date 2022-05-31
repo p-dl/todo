@@ -1,5 +1,4 @@
 "use strict";
-let msg = document.getElementById('message');
 class Todo {
     constructor(item, isCompleted) {
         this.item = item;
@@ -39,7 +38,7 @@ class Todo {
     }
     addNew() {
         saved.items.push(this.item);
-        saved.areCompleted.push(false);
+        saved.areCompleted.push(this.isCompleted);
         localStorage.setItem("items", JSON.stringify(saved.items));
         localStorage.setItem("areCompleted", JSON.stringify(saved.areCompleted));
         let inputForm = document.getElementById('inputForm');
@@ -80,19 +79,29 @@ class Todo {
             new Todo(item, saved.areCompleted[index]).createList();
         });
     }
+    static emptyMessage() {
+        msg.innerHTML = `<div class="alert alert-danger">Cannot add empty item.</div>`;
+    }
 }
 Todo.counter = 0;
 let saved = { items: localStorage.items && JSON.parse(localStorage.items) || [], areCompleted: localStorage.areCompleted && JSON.parse(localStorage.areCompleted) || [] };
 let addButton = document.getElementById('addButton');
 let clearButton = document.getElementById('clearButton');
+let msg = document.getElementById('message');
+const startApp = (todoItem = "", isCompleted = true) => {
+    var todo = new Todo(todoItem, isCompleted);
+    !isCompleted && todo.addNew();
+    isCompleted && Todo.reclone();
+};
+startApp();
 addButton.onclick = (e) => {
     e.preventDefault();
     let item = document.getElementById('todoName').value;
     if (item === "") {
-        msg.innerHTML = `<div class="alert alert-danger">Cannot add empty item.</div>`;
+        Todo.emptyMessage();
     }
     else {
-        new Todo(item, false).addNew();
+        startApp(item, false);
     }
 };
 clearButton.onclick = () => {

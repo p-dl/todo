@@ -11,8 +11,6 @@ interface Item {
     complete(e: Event): void
 }
 
-let msg: HTMLElement = document.getElementById('message')!
-
 class Todo implements Item {
     item: string
     isCompleted: boolean
@@ -55,7 +53,7 @@ class Todo implements Item {
     }
     addNew(): void {
         saved.items.push(this.item)
-        saved.areCompleted.push(false)
+        saved.areCompleted.push(this.isCompleted)
         localStorage.setItem("items", JSON.stringify(saved.items))
         localStorage.setItem("areCompleted", JSON.stringify(saved.areCompleted))
         let inputForm: HTMLFormElement = <HTMLFormElement>document.getElementById('inputForm')
@@ -96,18 +94,28 @@ class Todo implements Item {
             new Todo(item, saved.areCompleted[index]).createList()
         })
     }
+    static emptyMessage(): void {
+        msg.innerHTML = `<div class="alert alert-danger">Cannot add empty item.</div>`
+    }
 }
 
 let saved: Saved = { items: localStorage.items && JSON.parse(localStorage.items) || [], areCompleted: localStorage.areCompleted && JSON.parse(localStorage.areCompleted) || [] }
 let addButton: HTMLElement = document.getElementById('addButton')!
 let clearButton: HTMLElement = document.getElementById('clearButton')!
+let msg: HTMLElement = document.getElementById('message')!
+const startApp = (todoItem: string = "", isCompleted: boolean = true): void => {
+    var todo = new Todo(todoItem, isCompleted)
+    !isCompleted && todo.addNew()
+    isCompleted && Todo.reclone()
+}
+startApp()
 addButton.onclick = (e: Event) => {
     e.preventDefault()
     let item: string = (<HTMLInputElement>document.getElementById('todoName')!).value
     if (item === "") {
-        msg.innerHTML = `<div class="alert alert-danger">Cannot add empty item.</div>`
+        Todo.emptyMessage()
     } else {
-        new Todo(item, false).addNew()
+        startApp(item, false)
     }
 }
 clearButton.onclick = () => {
