@@ -16,7 +16,15 @@ class Todo {
         btnCompleted.classList.add("btn");
         btnCompleted.classList.add("btn-success");
         btnCompleted.onclick = (e) => this.complete(e);
-        if (!this.isCompleted) {
+        this.isCompleted ? (() => {
+            let liDown = document.createElement('li');
+            liDown.classList.add("list-group-item");
+            liDown.setAttribute("id", `list_${Todo.counter++}`);
+            liDown.appendChild(listItem);
+            liDown.appendChild(btnDelete);
+            let completedUL = document.getElementById('completedUL');
+            completedUL.appendChild(liDown);
+        })() : (() => {
             let liUp = document.createElement('li');
             liUp.classList.add("list-group-item");
             liUp.setAttribute("id", `list_${Todo.counter++}`);
@@ -25,16 +33,7 @@ class Todo {
             liUp.appendChild(btnCompleted);
             let todoUL = document.getElementById('todoUL');
             todoUL.appendChild(liUp);
-        }
-        else {
-            let liDown = document.createElement('li');
-            liDown.classList.add("list-group-item");
-            liDown.setAttribute("id", `list_${Todo.counter++}`);
-            liDown.appendChild(listItem);
-            liDown.appendChild(btnDelete);
-            let completedUL = document.getElementById('completedUL');
-            completedUL.appendChild(liDown);
-        }
+        })();
     }
     addNew() {
         saved.items.push(this.item);
@@ -84,14 +83,16 @@ class Todo {
     }
 }
 Todo.counter = 0;
-let saved = { items: localStorage.items && JSON.parse(localStorage.items) || [], areCompleted: localStorage.areCompleted && JSON.parse(localStorage.areCompleted) || [] };
+let saved = {
+    items: localStorage.items ? JSON.parse(localStorage.items) : [],
+    areCompleted: localStorage.areCompleted ? JSON.parse(localStorage.areCompleted) : []
+};
 let addButton = document.getElementById('addButton');
 let clearButton = document.getElementById('clearButton');
 let msg = document.getElementById('message');
 const startApp = (todoItem = "", isCompleted = true) => {
     var todo = new Todo(todoItem, isCompleted);
-    !isCompleted && todo.addNew();
-    isCompleted && Todo.reclone();
+    isCompleted ? Todo.reclone() : todo.addNew();
 };
 startApp();
 addButton.onclick = (e) => {
