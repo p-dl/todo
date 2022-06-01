@@ -6,7 +6,7 @@ interface Item {
     item: string
     isCompleted: boolean
     createList(): void
-    addNew(item: String): void
+    addNew(): void
     delete(e: Event): void
     complete(e: Event): void
 }
@@ -31,7 +31,15 @@ class Todo implements Item {
         btnCompleted.classList.add("btn")
         btnCompleted.classList.add("btn-success")
         btnCompleted.onclick = (e) => this.complete(e)
-        if (!this.isCompleted) {
+        this.isCompleted ? (() => {
+            let liDown = document.createElement('li')
+            liDown.classList.add("list-group-item")
+            liDown.setAttribute("id", `list_${Todo.counter++}`)
+            liDown.appendChild(listItem)
+            liDown.appendChild(btnDelete)
+            let completedUL: HTMLElement = document.getElementById('completedUL')!
+            completedUL.appendChild(liDown)
+        })() : (() => {
             let liUp = document.createElement('li')
             liUp.classList.add("list-group-item")
             liUp.setAttribute("id", `list_${Todo.counter++}`)
@@ -40,16 +48,7 @@ class Todo implements Item {
             liUp.appendChild(btnCompleted)
             let todoUL: HTMLElement = document.getElementById('todoUL')!
             todoUL.appendChild(liUp)
-        }
-        else {
-            let liDown = document.createElement('li')
-            liDown.classList.add("list-group-item")
-            liDown.setAttribute("id", `list_${Todo.counter++}`)
-            liDown.appendChild(listItem)
-            liDown.appendChild(btnDelete)
-            let completedUL: HTMLElement = document.getElementById('completedUL')!
-            completedUL.appendChild(liDown)
-        }
+        })()
     }
     addNew(): void {
         saved.items.push(this.item)
@@ -99,14 +98,16 @@ class Todo implements Item {
     }
 }
 
-let saved: Saved = { items: localStorage.items && JSON.parse(localStorage.items) || [], areCompleted: localStorage.areCompleted && JSON.parse(localStorage.areCompleted) || [] }
+let saved: Saved = {
+    items: localStorage.items ? JSON.parse(localStorage.items) : [],
+    areCompleted: localStorage.areCompleted ? JSON.parse(localStorage.areCompleted) : []
+}
 let addButton: HTMLElement = document.getElementById('addButton')!
 let clearButton: HTMLElement = document.getElementById('clearButton')!
 let msg: HTMLElement = document.getElementById('message')!
 const startApp = (todoItem: string = "", isCompleted: boolean = true): void => {
     var todo = new Todo(todoItem, isCompleted)
-    !isCompleted && todo.addNew()
-    isCompleted && Todo.reclone()
+    isCompleted ? Todo.reclone() : todo.addNew()
 }
 startApp()
 addButton.onclick = (e: Event) => {
